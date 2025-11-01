@@ -1,0 +1,21 @@
+{
+  "class_indices": {
+    "foot": 0,
+    "general_body": 1,
+    "non_cattle": 2,
+    "tongue": 3,
+    "udder": 4
+  },
+  "class_names": [
+    "foot",
+    "general_body",
+    "non_cattle",
+    "tongue",
+    "udder"
+  ],
+  "img_size": [
+    224,
+    224
+  ],
+  "num_classes": 5
+}

@@ -1,0 +1,16 @@
+{
+  "class_indices": {
+    "diseased": 0,
+    "non_cattle": 1,
+    "normal": 2
+  },
+  "class_names": [
+    "diseased",
+    "non_cattle",
+    "normal"
+  ],
+  "img_size": [
+    224,
+    224
+  ]
+}
