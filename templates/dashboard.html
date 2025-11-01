@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Cattle Detection{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+            <p class="text-white">Welcome back, {{ session.user_name }}!</p>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                    <h3>{{ predictions|length }}</h3>
+                    <p>Total Detections</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-microscope fa-3x text-success mb-3"></i>
+                    <h3>Quick</h3>
+                    <p>Analysis Speed</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-file-download fa-3x text-info mb-3"></i>
+                    <h3>PDF</h3>
+                    <p>Reports Available</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-history"></i> Recent Detections</h4>
+                </div>
+                <div class="card-body">
+                    {% if predictions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Body Part</th>
+                                    <th>Diagnosis</th>
+                                    <th>Confidence</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pred in predictions|reverse %}
+                                <tr>
+                                    <td>{{ pred.timestamp }}</td>
+                                    <td><span class="badge bg-primary">{{ pred.body_part }}</span></td>
+                                    <td>{{ pred.diagnosis }}</td>
+                                    <td>{{ "%.1f"|format(pred.confidence * 100) }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">No detections yet. Start by analyzing your first image!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-rocket"></i> Quick Actions</h4>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('detect') }}" class="btn btn-success w-100 mb-3">
+                        <i class="fas fa-camera"></i> New Detection
+                    </a>
+                    <a href="{{ url_for('about') }}" class="btn btn-info w-100 mb-3">
+                        <i class="fas fa-info-circle"></i> How It Works
+                    </a>
+                    <a href="{{ url_for('contact') }}" class="btn btn-warning w-100">
+                        <i class="fas fa-envelope"></i> Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

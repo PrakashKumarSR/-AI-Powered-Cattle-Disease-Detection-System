@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}About - Cattle Detection{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-body p-5">
+                    <h1 class="text-center mb-4">
+                        <i class="fas fa-info-circle"></i> About Our System
+                    </h1>
+                    
+                    <h3 class="mt-4">🤖 AI-Powered Technology</h3>
+                    <p>Our system uses advanced deep learning models (MobileNetV2) trained on thousands of cattle images to detect diseases with high accuracy.</p>
+                    
+                    <h3 class="mt-4">🎯 Two-Stage Detection</h3>
+                    <p><strong>Stage 1: Body Part Detection</strong><br>
+                    The master model identifies which part of the cattle is in the image (foot, body, udder, or tongue).</p>
+                    
+                    <p><strong>Stage 2: Disease Classification</strong><br>
+                    The appropriate specialist model analyzes the detected body part for diseases.</p>
+                    
+                    <h3 class="mt-4">🩺 Detectable Diseases</h3>
+                    <ul>
+                        <li><strong>Lumpy Skin Disease</strong> - Viral disease affecting skin</li>
+                        <li><strong>Foot & Mouth Disease (FMD)</strong> - Highly contagious foot lesions</li>
+                        <li><strong>Mastitis</strong> - Udder inflammation and infection</li>
+                        <li><strong>Wooden Tongue</strong> - Tongue disease affecting eating</li>
+                    </ul>
+                    
+                    <h3 class="mt-4">📊 Accuracy</h3>
+                    <p>Our models achieve 88-94% accuracy across different disease types, providing reliable diagnostic assistance.</p>
+                    
+                    <h3 class="mt-4">⚕️ Medical Recommendations</h3>
+                    <p>Each detection includes:</p>
+                    <ul>
+                        <li>Immediate action steps</li>
+                        <li>First aid treatment guidelines</li>
+                        <li>Emergency warning signs</li>
+                        <li>Recommended medicines</li>
+                        <li>Home remedies</li>
+                        <li>Treatment timeline</li>
+                    </ul>
+                    
+                    <div class="alert alert-warning mt-4">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Important Disclaimer</h4>
+                        <p class="mb-0">This system is a diagnostic assistance tool and NOT a replacement for professional veterinary care. Always consult a licensed veterinarian for accurate diagnosis and treatment.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,563 @@
+{% extends "base.html" %}
+{% block title %}Detect Disease - Cattle Detection System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-section {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .upload-area {
+        border: 3px dashed #3498db;
+        border-radius: 15px;
+        padding: 60px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+    }
+    
+    .upload-area:hover {
+        background: #e3f2fd;
+        border-color: #2980b9;
+    }
+    
+    .upload-area.dragover {
+        background: #bbdefb;
+        border-color: #1976d2;
+    }
+    
+    .preview-container {
+        display: none;
+        position: relative;
+        margin: 20px 0;
+    }
+    
+    .preview-img {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .remove-img-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+    
+    .results-section {
+        display: none;
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-top: 30px;
+    }
+    
+    .result-header {
+        text-align: center;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .result-healthy {
+        background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        border: 2px solid #28a745;
+    }
+    
+    .result-disease {
+        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        border: 2px solid #dc3545;
+    }
+    
+    .result-warning {
+        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        border: 2px solid #ffc107;
+    }
+    
+    .confidence-badge {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin: 10px;
+    }
+    
+    .medical-section {
+        background: #f8f9fa;
+        border-left: 5px solid #e74c3c;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+    }
+    
+    .medical-section h4 {
+        color: #e74c3c;
+        margin-bottom: 15px;
+    }
+    
+    .action-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .action-list li {
+        padding: 10px;
+        margin: 5px 0;
+        background: white;
+        border-radius: 8px;
+        border-left: 4px solid #3498db;
+    }
+    
+    .action-list li:before {
+        content: "✓ ";
+        color: #27ae60;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+    
+    .emergency-box {
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+    
+    .medicine-card {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+    }
+    
+    .disclaimer-box {
+        background: #f8d7da;
+        border: 2px solid #dc3545;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 30px 0;
+        text-align: center;
+    }
+    
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        z-index: 9999;
+    }
+    
+    .loading-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+    }
+    
+    .spinner {
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .prob-bar-container {
+        margin: 15px 0;
+    }
+    
+    .prob-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    
+    .prob-bar {
+        height: 30px;
+        background: #e9ecef;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .prob-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 10px;
+        color: white;
+        font-weight: bold;
+        transition: width 1s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="upload-section">
+                <h2 class="text-center mb-4"><i class="fas fa-camera"></i> Upload Cattle Image</h2>
+                <p class="text-center text-muted">Upload an image for AI-powered disease detection</p>
+                
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt fa-4x text-primary mb-3"></i>
+                    <h4>Drag & Drop Image Here</h4>
+                    <p class="text-muted">or click to browse</p>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                    <button class="btn btn-primary mt-3" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-folder-open"></i> Choose Image
+                    </button>
+                </div>
+                
+                <div class="preview-container" id="previewContainer">
+                    <img id="previewImg" class="preview-img" alt="Preview">
+                    <button class="remove-img-btn" onclick="removeImage()">×</button>
+                </div>
+                
+                <button class="btn btn-success btn-lg w-100 mt-4" id="analyzeBtn" onclick="analyzeImage()" disabled>
+                    <i class="fas fa-microscope"></i> Analyze Image
+                </button>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4><i class="fas fa-info-circle"></i> Instructions</h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><i class="fas fa-check text-success"></i> Upload a clear image of cattle</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success"></i> Supported areas: Body, Foot, Udder, Tongue</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success"></i> AI will detect body part automatically</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success"></i> Get instant diagnosis and recommendations</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success"></i> Download detailed medical report</li>
+                    </ul>
+                    
+                    <div class="alert alert-warning mt-4">
+                        <i class="fas fa-exclamation-triangle"></i> <strong>Note:</strong> This is a diagnostic aid tool. Always consult a veterinarian for confirmation.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Results Section -->
+    <div class="results-section" id="resultsSection"></div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <h3>🧠 AI Analysis in Progress...</h3>
+        <p>Stage 1: Detecting body part<br>Stage 2: Analyzing for diseases</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentFile = null;
+let currentResult = null;
+
+const fileInput = document.getElementById('fileInput');
+const uploadArea = document.getElementById('uploadArea');
+const previewContainer = document.getElementById('previewContainer');
+const previewImg = document.getElementById('previewImg');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const resultsSection = document.getElementById('resultsSection');
+const loadingOverlay = document.getElementById('loadingOverlay');
+
+// File upload handlers
+fileInput.addEventListener('change', function(e) {
+    if (this.files && this.files[0]) {
+        handleFile(this.files[0]);
+    }
+});
+
+uploadArea.addEventListener('click', () => fileInput.click());
+
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('dragover');
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFile(e.dataTransfer.files[0]);
+    }
+});
+
+function handleFile(file) {
+    if (!file.type.match('image.*')) {
+        alert('Please select an image file');
+        return;
+    }
+    
+    currentFile = file;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        previewImg.src = e.target.result;
+        previewContainer.style.display = 'block';
+        uploadArea.style.display = 'none';
+        analyzeBtn.disabled = false;
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeImage() {
+    currentFile = null;
+    fileInput.value = '';
+    previewContainer.style.display = 'none';
+    uploadArea.style.display = 'block';
+    analyzeBtn.disabled = true;
+    resultsSection.style.display = 'none';
+}
+
+async function analyzeImage() {
+    if (!currentFile) {
+        alert('Please select an image first');
+        return;
+    }
+    
+    loadingOverlay.style.display = 'block';
+    resultsSection.style.display = 'none';
+    
+    const formData = new FormData();
+    formData.append('file', currentFile);  // CRITICAL: Must be 'file' to match app.py
+    
+    try {
+        const response = await fetch('/predict', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            currentResult = data;
+            displayResults(data);
+        } else {
+            alert('Error: ' + (data.error || 'Analysis failed'));
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+        console.error('Full error:', error);
+    } finally {
+        loadingOverlay.style.display = 'none';
+    }
+}
+
+function displayResults(result) {
+    let resultClass = 'result-warning';
+    let resultIcon = '⚠️';
+    let resultTitle = result.predicted_class;
+    
+    if (result.status === 'HEALTHY') {
+        resultClass = 'result-healthy';
+        resultIcon = '✅';
+    } else if (result.status === 'DISEASE') {
+        resultClass = 'result-disease';
+        resultIcon = '🚨';
+    }
+    
+    let html = `
+        <div class="result-header ${resultClass}">
+            <h1 style="font-size: 3rem;">${resultIcon}</h1>
+            <h2>${resultTitle}</h2>
+            <div class="confidence-badge bg-primary text-white">
+                Confidence: ${result.confidence_percent}
+            </div>
+            <p class="mt-3">
+                <strong>Body Part Detected:</strong> ${result.body_part.toUpperCase()}<br>
+                <strong>Specialist Used:</strong> ${result.specialist_used || 'Master Model Only'}
+            </p>
+        </div>
+    `;
+    
+    // Show only highest probability
+    if (result.specialist_probabilities) {
+        const probs = Object.entries(result.specialist_probabilities);
+        const highest = probs.reduce((max, curr) => curr[1] > max[1] ? curr : max);
+        
+        html += `
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4><i class="fas fa-chart-bar"></i> Detection Result</h4>
+                    <div class="prob-bar-container">
+                        <div class="prob-label">
+                            <span><strong>${highest[0]}</strong></span>
+                            <span>${(highest[1] * 100).toFixed(2)}%</span>
+                        </div>
+                        <div class="prob-bar">
+                            <div class="prob-fill" style="width: ${highest[1] * 100}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Medical information
+    if (result.medical_info && result.status === 'DISEASE') {
+        const med = result.medical_info;
+        
+        html += `
+            <div class="medical-section">
+                <h3><i class="fas fa-heartbeat"></i> Medical Recommendations</h3>
+                
+                <div class="card mb-3">
+                    <div class="card-header bg-danger text-white">
+                        <h4 class="mb-0">⚠️ IMMEDIATE ACTIONS</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul class="action-list">
+                            ${med.immediate_actions.map(action => `<li>${action}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">💊 FIRST AID TREATMENT</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul class="action-list">
+                            ${med.first_aid.map(aid => `<li>${aid}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="emergency-box">
+                    <h4><i class="fas fa-ambulance"></i> CALL VET URGENTLY IF:</h4>
+                    <ul>
+                        ${med.emergency_signs.map(sign => `<li><strong>${sign}</strong></li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">💊 RECOMMENDED MEDICINES</h4>
+                    </div>
+                    <div class="card-body">
+                        ${med.medicines.map(medicine => `
+                            <div class="medicine-card">
+                                <h5>${medicine.name}</h5>
+                                <p><strong>Type:</strong> ${medicine.type}</p>
+                                <p><strong>Brand:</strong> ${medicine.brand}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="mb-0">🌿 HOME REMEDIES</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            ${med.home_remedies.map(remedy => `<li>${remedy}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-clock"></i> Treatment Timeline</h5>
+                    <p>${med.timeline}</p>
+                    <p><strong>Prognosis:</strong> ${med.prognosis}</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Disclaimer
+    html += `
+        <div class="disclaimer-box">
+            <h4><i class="fas fa-exclamation-triangle"></i> MEDICAL DISCLAIMER</h4>
+            <p><strong>This information is for emergency first aid only before professional veterinary care.</strong></p>
+            <p>It is NOT a substitute for veterinary diagnosis and treatment. Always consult a licensed veterinarian for accurate diagnosis and treatment protocols.</p>
+            <h3 class="text-danger mt-4">⚠️ CONSULT VETERINARIAN IMMEDIATELY</h3>
+        </div>
+    `;
+    
+    // Download button
+    html += `
+        <div class="text-center mt-4">
+            <button class="btn btn-lg btn-primary" onclick="downloadReport()">
+                <i class="fas fa-download"></i> Download Medical Report (PDF)
+            </button>
+            <button class="btn btn-lg btn-secondary ms-2" onclick="removeImage()">
+                <i class="fas fa-redo"></i> Analyze Another Image
+            </button>
+        </div>
+    `;
+    
+    resultsSection.innerHTML = html;
+    resultsSection.style.display = 'block';
+    resultsSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+async function downloadReport() {
+    if (!currentResult) return;
+    
+    try {
+        const response = await fetch('/download_report', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(currentResult)
+        });
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cattle_report_${new Date().getTime()}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        alert('✅ Report downloaded successfully!');
+    } catch (error) {
+        alert('Error downloading report: ' + error.message);
+    }
+}
+</script>
+{% endblock %}

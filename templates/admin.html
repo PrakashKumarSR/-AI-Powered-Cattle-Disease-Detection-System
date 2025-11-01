@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - Cattle Detection{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-white mb-4"><i class="fas fa-user-shield"></i> Admin Panel</h2>
+    
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                    <h3>{{ users|length }}</h3>
+                    <p>Total Users</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-chart-bar fa-3x text-success mb-3"></i>
+                    <h3>{{ predictions|length }}</h3>
+                    <p>Total Detections</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-server fa-3x text-info mb-3"></i>
+                    <h3>Active</h3>
+                    <p>System Status</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4><i class="fas fa-history"></i> Recent Detection Logs</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th>Body Part</th>
+                            <th>Diagnosis</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pred in predictions %}
+                        <tr>
+                            <td>{{ pred.timestamp }}</td>
+                            <td>{{ pred.user_name }}</td>
+                            <td><span class="badge bg-primary">{{ pred.body_part }}</span></td>
+                            <td>{{ pred.diagnosis }}</td>
+                            <td>{{ "%.1f"|format(pred.confidence * 100) }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h4><i class="fas fa-users"></i> Registered Users</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Name</th>
+                            <th>Role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for email, user in users.items() %}
+                        <tr>
+                            <td>{{ email }}</td>
+                            <td>{{ user.name }}</td>
+                            <td><span class="badge bg-{{ 'danger' if user.role == 'admin' else 'secondary' }}">{{ user.role }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
